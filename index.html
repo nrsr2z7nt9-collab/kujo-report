@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>捕獲報告書</title>
+  <meta name="theme-color" content="#3f5a2e" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div class="title">
+      <h1>捕獲報告書</h1>
+      <div class="sub">捕獲事実証明書を作る・残す・出す</div>
+      <div class="mobile-url">端末内保存・オフライン対応</div>
+    </div>
+    <button id="back-btn" class="ghost" hidden>← 一覧に戻る</button>
+  </header>
+
+  <main>
+    <!-- 一覧画面 -->
+    <section id="list-view">
+      <div class="toolbar">
+        <label>期間:
+          <input type="month" id="filter-month" />
+        </label>
+        <button id="filter-clear" class="ghost">すべて</button>
+        <button id="backup-btn" class="ghost">バックアップ</button>
+        <button id="restore-btn" class="ghost">復元</button>
+        <input id="restore-file" type="file" accept="application/json" hidden />
+        <span class="spacer"></span>
+        <button id="new-btn" class="primary">＋ 新しい記録</button>
+      </div>
+
+      <div id="summary" class="summary"></div>
+
+      <table id="records-table">
+        <thead>
+          <tr>
+            <th>捕獲日</th>
+            <th>種類</th>
+            <th>性別</th>
+            <th>地区</th>
+            <th>場所</th>
+            <th>わな番号</th>
+            <th>写真</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="records-tbody"></tbody>
+      </table>
+      <div id="empty-state" class="empty" hidden>
+        まだ記録がありません。「＋ 新しい記録」から1件目を作りましょう。
+      </div>
+    </section>
+
+    <!-- 編集画面 -->
+    <section id="edit-view" hidden>
+      <form id="record-form">
+        <div class="form-actions">
+          <button type="button" id="pdf-btn" class="primary" hidden>PDFを作成</button>
+          <button type="button" id="print-btn" class="primary" hidden>印刷</button>
+          <button type="button" id="docx-btn" class="ghost" hidden>バックアップ</button>
+          <button type="button" id="delete-btn" class="danger ghost" hidden>削除</button>
+          <span class="spacer"></span>
+          <button type="submit" class="primary">保存</button>
+        </div>
+
+        <div class="grid">
+          <label>捕獲日 <span class="req">*</span>
+            <input type="date" name="capture_date" required />
+          </label>
+          <label>捕獲者 <span class="req">*</span>
+            <input type="text" name="hunter_name" required placeholder="例: 宮嵜 勢太郎" />
+          </label>
+        </div>
+
+        <fieldset>
+          <legend>捕獲種類 <span class="req">*</span></legend>
+          <div id="species-options" class="radios"></div>
+        </fieldset>
+
+        <div class="grid">
+          <label>捕獲地区 <span class="req">*</span>
+            <select name="district" required>
+              <option value="">— 選択 —</option>
+            </select>
+          </label>
+          <label>捕獲場所
+            <input type="text" name="location" placeholder="例: 御宿台300番台" />
+          </label>
+        </div>
+
+        <div class="grid">
+          <label>わな番号
+            <input type="text" name="trap_number" placeholder="任意" />
+          </label>
+          <label>大きさ (cm)
+            <input type="number" name="size_cm" step="0.1" min="0" />
+          </label>
+          <label>重さ (kg)
+            <input type="number" name="weight_kg" step="0.1" min="0" />
+          </label>
+          <label>角数 (本)
+            <input type="number" name="antlers" step="1" min="0" />
+          </label>
+        </div>
+
+        <fieldset>
+          <legend>性別</legend>
+          <div class="radios">
+            <label><input type="radio" name="sex" value="オス" /> オス</label>
+            <label><input type="radio" name="sex" value="メス" /> メス</label>
+          </div>
+        </fieldset>
+
+        <div class="grid">
+          <fieldset>
+            <legend>胎児の有無</legend>
+            <div class="radios">
+              <label><input type="radio" name="has_fetus" value="無" checked /> 無</label>
+              <label><input type="radio" name="has_fetus" value="有" /> 有</label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>泌乳</legend>
+            <div class="radios">
+              <label><input type="radio" name="lactation" value="無" checked /> 無</label>
+              <label><input type="radio" name="lactation" value="有" /> 有</label>
+            </div>
+          </fieldset>
+        </div>
+
+        <fieldset>
+          <legend>捕獲方法</legend>
+          <div id="method-options" class="radios"></div>
+          <label class="inline">その他:
+            <input type="text" name="capture_method_other" placeholder="その他選択時のみ" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>廃棄</legend>
+          <div id="disposal-options" class="radios"></div>
+          <label class="inline">その他:
+            <input type="text" name="disposal_other" placeholder="その他選択時のみ" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>写真 (3枚) — 全身+メジャー / 別アングル / 自撮り+証明書</legend>
+          <div class="photo-slots">
+            <div class="photo-slot" data-slot="1">
+              <div class="photo-frame">
+                <img alt="写真1" hidden />
+                <div class="placeholder">📷 写真 1<br /><small>タップして写真を選択</small></div>
+              </div>
+              <input type="file" accept="image/jpeg,image/png" hidden />
+              <button type="button" class="ghost photo-clear" hidden>削除</button>
+            </div>
+            <div class="photo-slot" data-slot="2">
+              <div class="photo-frame">
+                <img alt="写真2" hidden />
+                <div class="placeholder">📷 写真 2<br /><small>タップして写真を選択</small></div>
+              </div>
+              <input type="file" accept="image/jpeg,image/png" hidden />
+              <button type="button" class="ghost photo-clear" hidden>削除</button>
+            </div>
+            <div class="photo-slot" data-slot="3">
+              <div class="photo-frame">
+                <img alt="写真3" hidden />
+                <div class="placeholder">📷 写真 3<br /><small>タップして写真を選択</small></div>
+              </div>
+              <input type="file" accept="image/jpeg,image/png" hidden />
+              <button type="button" class="ghost photo-clear" hidden>削除</button>
+            </div>
+          </div>
+          <p class="hint">※ 写真を選んでから「保存」を押すと、記録と写真をまとめて保存します。</p>
+        </fieldset>
+
+        <div id="form-error" class="error" hidden></div>
+      </form>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="standalone.js"></script>
+</body>
+</html>
