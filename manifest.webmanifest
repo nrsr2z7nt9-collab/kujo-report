@@ -1,0 +1,9 @@
+{
+  "name": "捕獲報告書",
+  "short_name": "捕獲報告書",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f2ec",
+  "theme_color": "#3f5a2e",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
